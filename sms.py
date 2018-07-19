@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*- 
 import re
 import pandas as pd
 import numpy as np
@@ -8,35 +7,15 @@ import xlsxwriter
 from collections import Counter
 from collections import defaultdict
 
-
-
-
-
-sms_file = r'E:\\mdlv\\yumco\\Yumco\\sms.xlsx'
-sms_result = r'E:\\mdlv\\yumco\\Yumco\\result.xlsx'
+sms_file = r'\\172.16.2.51\general\ДОКУМЕНТЫ ОТДЕЛОВ\ОКТП\Индикатор Статистика\Качество сотрудников\sms.xlsx'
+sms_result = r'\\172.16.2.51\general\ДОКУМЕНТЫ ОТДЕЛОВ\ОКТП\Индикатор Статистика\Качество сотрудников\result.xlsx'
 sms = pd.read_excel(sms_file)
-sms_phone = sms['Контактное лицо']
+sms_phone = sms['Контактное лицо'].str.replace('[^1234567890]','')
+sms['Контактное лицо'] = sms_phone
+sms_vd = sms['Присвоено на дату']
 sms_ls = sms['№ лиц. счета']
-sms_type = sms['Тип выезда']
-sms_brigada = ['Бригада']
+sms_df = pd.DataFrame(sms, columns = ['№ лиц. счета','Присвоено на дату', 'Контактное лицо']).drop_duplicates('№ лиц. счета')
 
-
-counter = Counter(sms_ls)
-sms_len = len(sms.index)
-
-for i in range(0, sms_len):
-    lf1 = sms_ls[i]
-    sms_phone[i] = sms_phone[i].lower()
-    sms_phone[i] = re.sub(r'[_-йцукенгшщзхъфывапролджэячсёмитьбю().+;,\s]','', sms_phone[i])
-    for j in range(0, sms_len):    
-        lf2 = sms_ls[j]
-        if j != i:
-            if lf1 == lf2:
-                sms_phone[i] = ''
-print('done')
-
-          
 writer_orig = pd.ExcelWriter(sms_result, engine='xlsxwriter')
-sms.to_excel(writer_orig, index=False, sheet_name='report')
+sms_df.to_excel(writer_orig, index=False, sheet_name='result')
 writer_orig.save()
-
